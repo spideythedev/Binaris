@@ -6,139 +6,110 @@
     <title>Binaris — JWT Security Toolkit</title>
     <style>
         :root {
-            --bg: #000;
-            --surface: #050505;
-            --border: #1a1a1a;
-            --text: #fafafa;
-            --muted: #a1a1aa;
-            --dim: #52525b;
-            --cyan: #06b6d4;
-            --green: #22c55e;
-            --yellow: #eab308;
-            --red: #ef4444;
+            --bg: #0d0d0d;
+            --surface: #141414;
+            --border: #1f1f1f;
+            --text: #e6e6e6;
+            --muted: #8a8a8a;
+            --dim: #5c5c5c;
+            --cyan: #5e6ad2;
+            --green: #0eb573;
+            --yellow: #f5a623;
+            --red: #e5484d;
+            --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            --mono: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            background: #000; color: var(--text);
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            -webkit-font-smoothing: antialiased;
-            overflow: hidden; height: 100vh;
+            background: var(--bg); color: var(--text);
+            font-family: var(--font); -webkit-font-smoothing: antialiased;
+            height: 100vh; overflow: hidden; font-size: 13px; line-height: 1.5;
         }
 
         .preloader {
-            position: fixed; inset: 0; z-index: 9999; background: #000;
+            position: fixed; inset: 0; z-index: 999; background: var(--bg);
             display: flex; flex-direction: column; align-items: center;
-            justify-content: center; transition: opacity 0.6s ease, visibility 0.6s ease;
+            justify-content: center; transition: opacity 0.5s ease;
         }
-        .preloader.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
-        .preloader img { height: 40px; margin-bottom: 32px; }
-        .preloader-track {
-            width: 200px; height: 1px; background: var(--border);
-            border-radius: 1px; overflow: hidden; position: relative;
-        }
-        .preloader-bar {
-            position: absolute; top: 0; left: 0; height: 100%; width: 0;
-            background: var(--cyan); border-radius: 1px;
-            animation: load 1.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-            box-shadow: 0 0 20px rgba(6,182,212,0.5);
-        }
-        @keyframes load {
-            0% { width: 0; }
-            30% { width: 40%; }
-            60% { width: 75%; }
-            90% { width: 98%; }
-            100% { width: 100%; }
-        }
-        .preloader-text {
-            font-size: 11px; color: var(--dim); margin-top: 20px;
-            letter-spacing: 2px; text-transform: uppercase; animation: pulse 2s infinite;
-        }
-        @keyframes pulse { 0%,100%{opacity:0.4} 50%{opacity:1} }
+        .preloader.hidden { opacity: 0; pointer-events: none; }
+        .preloader img { height: 28px; margin-bottom: 28px; }
+        .preloader-track { width: 160px; height: 2px; background: var(--border); border-radius: 2px; overflow: hidden; }
+        .preloader-bar { height: 100%; width: 0; background: var(--cyan); border-radius: 2px; animation: load 1.6s cubic-bezier(0.4,0,0.2,1) forwards; }
+        @keyframes load { to { width: 100%; } }
 
-        .app { display: flex; flex-direction: column; height: 100vh; opacity: 0; animation: fadeApp 0.8s ease 2s forwards; }
-        @keyframes fadeApp { to { opacity: 1; } }
+        .app { display: flex; flex-direction: column; height: 100vh; opacity: 0; animation: show 0.5s ease 1.8s forwards; }
+        @keyframes show { to { opacity: 1; } }
 
         .nav {
-            height: 56px; border-bottom: 1px solid rgba(255,255,255,0.05);
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 0 24px; flex-shrink: 0;
+            height: 40px; display: flex; align-items: center; justify-content: space-between;
+            padding: 0 16px; flex-shrink: 0; border-bottom: 1px solid transparent;
         }
-        .nav img { height: 22px; }
-        .nav-badge { font-size: 10px; color: var(--dim); letter-spacing: 1.5px; font-weight: 500; }
+        .nav img { height: 18px; opacity: 0.9; }
+        .nav span { font-size: 11px; color: var(--dim); font-weight: 500; letter-spacing: 0.5px; }
 
         .layout { display: flex; flex: 1; overflow: hidden; }
         .sidebar {
-            width: 250px; border-right: 1px solid rgba(255,255,255,0.04);
-            background: rgba(255,255,255,0.01); padding: 12px 0; overflow-y: auto;
+            width: 200px; flex-shrink: 0; padding: 12px 8px; overflow-y: auto;
+            border-right: 1px solid var(--border);
         }
         .sidebar-item {
-            display: flex; align-items: center; gap: 10px; padding: 11px 20px;
-            cursor: pointer; font-size: 13px; color: var(--dim); transition: all 0.2s;
-            border-left: 2px solid transparent;
+            display: flex; align-items: center; gap: 8px; padding: 6px 10px;
+            border-radius: 6px; cursor: pointer; font-size: 12px; color: var(--muted);
+            transition: all 0.1s; margin-bottom: 1px; font-weight: 450;
         }
-        .sidebar-item:hover { background: rgba(255,255,255,0.02); color: var(--text); }
-        .sidebar-item.active { background: rgba(6,182,212,0.05); color: var(--cyan); border-left-color: var(--cyan); }
-        .sidebar-item svg { width: 16px; height: 16px; opacity: 0.4; flex-shrink: 0; }
-        .sidebar-item.active svg { opacity: 1; }
-        .main { flex: 1; padding: 36px; overflow-y: auto; animation: slideContent 0.5s ease; }
-        @keyframes slideContent { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .sidebar-item:hover { background: var(--surface); color: var(--text); }
+        .sidebar-item.active { background: var(--surface); color: var(--text); }
+        .sidebar-item svg { width: 14px; height: 14px; opacity: 0.5; flex-shrink: 0; }
+        .sidebar-item.active svg { opacity: 1; color: var(--cyan); }
 
-        .page-header { margin-bottom: 28px; }
-        .page-header h2 { font-size: 26px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 6px; }
-        .page-header p { font-size: 14px; color: var(--dim); }
+        .main { flex: 1; overflow-y: auto; padding: 32px 48px; }
+        .page-header { margin-bottom: 24px; }
+        .page-header h2 { font-size: 18px; font-weight: 600; letter-spacing: -0.3px; margin-bottom: 4px; color: var(--text); }
+        .page-header p { font-size: 12px; color: var(--dim); }
 
-        .card {
-            background: var(--surface); border: 1px solid rgba(255,255,255,0.05);
-            border-radius: 14px; padding: 22px; margin-bottom: 16px;
-            transition: border-color 0.3s;
-        }
-        .card:focus-within { border-color: rgba(6,182,212,0.2); }
+        .input-wrap { margin-bottom: 16px; }
         textarea, input[type="text"] {
-            width: 100%; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06);
-            border-radius: 10px; padding: 14px 18px; color: var(--text);
-            font-family: 'SF Mono', 'Fira Code', monospace; font-size: 13px;
-            outline: none; transition: all 0.3s; resize: vertical; line-height: 1.6;
+            width: 100%; background: var(--surface); border: 1px solid var(--border);
+            border-radius: 8px; padding: 12px 16px; color: var(--text);
+            font-family: var(--mono); font-size: 12px; outline: none;
+            transition: border-color 0.15s; resize: vertical; line-height: 1.6;
         }
-        textarea:focus, input[type="text"]:focus { border-color: rgba(6,182,212,0.3); background: rgba(255,255,255,0.03); }
-        textarea { min-height: 140px; }
-        textarea::placeholder, input::placeholder { color: #3f3f46; }
+        textarea:focus, input[type="text"]:focus { border-color: #444; }
+        textarea { min-height: 120px; }
+        textarea::placeholder, input::placeholder { color: #444; }
 
         .btn {
-            display: inline-flex; align-items: center; gap: 8px; padding: 10px 22px;
-            border-radius: 10px; border: none; cursor: pointer; font-size: 13px;
-            font-weight: 600; font-family: inherit; transition: all 0.3s;
+            display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px;
+            border-radius: 6px; border: none; cursor: pointer; font-size: 12px;
+            font-weight: 500; font-family: var(--font); transition: all 0.1s;
         }
-        .btn-p { background: var(--cyan); color: #000; }
-        .btn-p:hover { filter: brightness(1.1); box-shadow: 0 4px 20px rgba(6,182,212,0.2); }
-        .btn-s { background: rgba(255,255,255,0.03); color: var(--text); border: 1px solid rgba(255,255,255,0.08); }
-        .btn-s:hover { background: rgba(255,255,255,0.06); }
+        .btn-primary { background: var(--text); color: var(--bg); }
+        .btn-primary:hover { background: #ccc; }
+        .btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+        .btn-secondary:hover { border-color: #444; }
 
-        .output {
-            background: var(--surface); border: 1px solid rgba(255,255,255,0.05);
-            border-radius: 14px; padding: 20px; font-family: 'SF Mono', 'Fira Code', monospace;
-            font-size: 13px; white-space: pre-wrap; word-break: break-all;
-            color: var(--muted); line-height: 1.7; min-height: 60px;
+        .output-box {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 8px; padding: 16px; font-family: var(--mono);
+            font-size: 12px; white-space: pre-wrap; word-break: break-all;
+            color: var(--muted); line-height: 1.6; min-height: 40px;
         }
-        .label { font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 6px; font-weight: 600; }
-        .alert { padding: 14px 18px; border-radius: 12px; font-size: 13px; margin-top: 14px; display: flex; gap: 10px; line-height: 1.5; animation: slideIn 0.3s ease; }
-        @keyframes slideIn { from { opacity: 0; transform: translateY(-6px); } }
-        .alert-info { background: rgba(6,182,212,0.04); color: #22d3ee; border: 1px solid rgba(6,182,212,0.1); }
-        .alert-warn { background: rgba(234,179,8,0.04); color: #facc15; border: 1px solid rgba(234,179,8,0.1); }
-        .alert-danger { background: rgba(239,68,68,0.04); color: #f87171; border: 1px solid rgba(239,68,68,0.1); }
-        .alert svg { width: 16px; height: 16px; flex-shrink: 0; margin-top: 2px; }
-        .flex { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-        .mt-2 { margin-top: 12px; }
-        .mt-3 { margin-top: 18px; }
-        .mb-2 { margin-bottom: 10px; }
+        .label { font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; font-weight: 500; }
+        .alert { padding: 10px 14px; border-radius: 6px; font-size: 12px; margin-top: 10px; display: flex; gap: 8px; line-height: 1.5; }
+        .alert-info { background: rgba(94,106,210,0.08); color: #8b9bff; }
+        .alert-warn { background: rgba(245,166,35,0.08); color: #f5a623; }
+        .alert-danger { background: rgba(229,72,77,0.08); color: #e5484d; }
+        .alert svg { width: 14px; height: 14px; flex-shrink: 0; margin-top: 1px; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .mt-2 { margin-top: 10px; }
+        .flex { display: flex; gap: 8px; align-items: center; }
 
         @media (max-width: 768px) {
             .layout { flex-direction: column; }
-            .sidebar { width: 100%; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.04); flex-direction: row; overflow-x: auto; padding: 4px; }
-            .sidebar-item { flex-shrink: 0; border-left: none; border-bottom: 2px solid transparent; font-size: 11px; padding: 10px 14px; }
-            .sidebar-item.active { border-bottom-color: var(--cyan); }
-            .grid-2 { grid-template-columns: 1fr; }
+            .sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--border); flex-direction: row; overflow-x: auto; padding: 6px; }
+            .sidebar-item { flex-shrink: 0; font-size: 11px; padding: 5px 8px; }
             .main { padding: 20px; }
+            .grid-2 { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -146,16 +117,15 @@
 
     <div class="preloader" id="preloader">
         <img src="binaris.png" alt="Binaris" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
-        <div style="display:none;font-weight:700;font-size:32px;letter-spacing:-0.5px;margin-bottom:32px">BIN<span style="color:#06b6d4">ARIS</span></div>
+        <div style="display:none;font-size:20px;font-weight:600;letter-spacing:-0.3px;margin-bottom:28px;color:var(--text)">BINARIS</div>
         <div class="preloader-track"><div class="preloader-bar"></div></div>
-        <div class="preloader-text">Initializing toolkit</div>
     </div>
 
     <div class="app" id="app">
         <nav class="nav">
-            <img src="binaris.png" alt="Binaris" onerror="this.style.display='none';this.nextElementSibling.style.display='block'" style="height:22px">
-            <span style="display:none;font-weight:700;font-size:17px;letter-spacing:-0.3px">BIN<span style="color:#06b6d4">ARIS</span></span>
-            <div class="nav-badge">JWT Security Toolkit</div>
+            <img src="binaris.png" alt="Binaris" onerror="this.style.display='none';this.nextElementSibling.style.display='block'" style="height:18px">
+            <span style="display:none;font-size:13px;font-weight:600;letter-spacing:-0.2px;color:var(--text)">BINARIS</span>
+            <span>JWT Toolkit</span>
         </nav>
         <div class="layout">
             <aside class="sidebar" id="sidebar"></aside>
@@ -164,22 +134,20 @@
     </div>
 
     <script>
-        setTimeout(function() {
-            document.getElementById('preloader').classList.add('hidden');
-        }, 2200);
+        setTimeout(function() { document.getElementById('preloader').classList.add('hidden'); }, 1900);
 
         var tools = [
-            { id: 'decode', name: 'Decode JWT', desc: 'Decode header, payload, and signature with security alerts', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/></svg>' },
-            { id: 'alg', name: 'Algorithm Analysis', desc: 'Detect algorithm and security misconfigurations', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>' },
-            { id: 'none', name: 'alg=none Exploit', desc: 'Test if server accepts tokens without signature', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>' },
-            { id: 'secret', name: 'Weak Secret Scanner', desc: 'Test against common weak secrets', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>' },
-            { id: 'expiry', name: 'Time Claim Inspector', desc: 'Analyze expiration and time-based claims', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' },
-            { id: 'confusion', name: 'Key Confusion Test', desc: 'Test RS256 to HS256 algorithm confusion', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>' },
-            { id: 'claims', name: 'Claims Deep Dive', desc: 'View all claims with detailed explanations', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>' },
-            { id: 'generate', name: 'Token Forge', desc: 'Generate test JWT tokens with custom payload', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>' }
+            { id: 'decode', name: 'Decode', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/></svg>' },
+            { id: 'alg', name: 'Algorithm', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>' },
+            { id: 'none', name: 'alg=none', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>' },
+            { id: 'secret', name: 'Secrets', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>' },
+            { id: 'expiry', name: 'Expiry', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' },
+            { id: 'confusion', name: 'Confusion', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/></svg>' },
+            { id: 'claims', name: 'Claims', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/></svg>' },
+            { id: 'generate', name: 'Forge', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>' }
         ];
 
-        var commonSecrets = ['secret','password','123456','admin','key','jwt_secret','changeme','test','private','public','your-256-bit-secret','secretkey'];
+        var secrets = ['secret','password','123456','admin','key','jwt_secret','changeme'];
 
         function render() {
             document.getElementById('sidebar').innerHTML = tools.map(function(t) {
@@ -189,107 +157,114 @@
         }
 
         function select(id) {
-            document.querySelectorAll('.sidebar-item').forEach(function(el) { el.classList.remove('active'); });
+            document.querySelectorAll('.sidebar-item').forEach(function(e) { e.classList.remove('active'); });
             document.querySelector('[data-id="'+id+'"]').classList.add('active');
             document.getElementById('main').innerHTML = page(id);
         }
 
         function page(id) {
-            var t = tools.find(function(x){return x.id===id;});
-            var h = '<div class="page-header"><h2>'+t.name+'</h2><p>'+t.desc+'</p></div>';
-            if (id==='decode') h += decodePage();
-            if (id==='alg') h += algPage();
-            if (id==='none') h += nonePage();
-            if (id==='secret') h += secretPage();
-            if (id==='expiry') h += expiryPage();
-            if (id==='confusion') h += confusionPage();
-            if (id==='claims') h += claimsPage();
-            if (id==='generate') h += generatePage();
+            var t = tools.find(function(x) { return x.id === id; });
+            var h = '<div class="page-header"><h2>'+t.name+'</h2></div>';
+            if (id==='decode') return h + decodePage();
+            if (id==='alg') return h + algPage();
+            if (id==='none') return h + nonePage();
+            if (id==='secret') return h + secretPage();
+            if (id==='expiry') return h + expiryPage();
+            if (id==='confusion') return h + confusionPage();
+            if (id==='claims') return h + claimsPage();
+            if (id==='generate') return h + generatePage();
             return h;
         }
 
         function decodePage() {
-            return '<div class="card"><textarea id="jwtInput" placeholder="Paste JWT token here..." oninput="decodeJWT()"></textarea></div>'+
-                '<div class="grid-2"><div><div class="label">Header</div><div class="output" id="hb"></div></div><div><div class="label">Payload</div><div class="output" id="pb"></div></div></div>'+
-                '<div class="mt-2"><div class="label">Signature</div><div class="output" id="sb" style="font-size:12px"></div></div><div id="alerts"></div>';
+            return '<div class="input-wrap"><textarea id="jwtInput" placeholder="Paste JWT token..." oninput="decodeJWT()"></textarea></div>'+
+                '<div class="grid-2"><div><div class="label">Header</div><div class="output-box" id="hb"></div></div><div><div class="label">Payload</div><div class="output-box" id="pb"></div></div></div>'+
+                '<div class="mt-2"><div class="label">Signature</div><div class="output-box" id="sb" style="font-size:11px"></div></div><div id="alerts"></div>';
         }
 
         function decodeJWT() {
             var v = document.getElementById('jwtInput')?.value.trim();
-            if (!v) { document.getElementById('hb').textContent='';document.getElementById('pb').textContent='';document.getElementById('sb').textContent='';document.getElementById('alerts').innerHTML='';return; }
+            if (!v) { ['hb','pb','sb'].forEach(function(id) { document.getElementById(id).textContent=''; }); document.getElementById('alerts').innerHTML=''; return; }
             var p = v.split('.');
-            if (p.length!==3) { document.getElementById('hb').textContent='Invalid JWT';return; }
+            if (p.length !== 3) { document.getElementById('hb').textContent='Invalid JWT'; return; }
             try {
                 var h = JSON.parse(atob(p[0].replace(/-/g,'+').replace(/_/g,'/')));
                 var b = JSON.parse(atob(p[1].replace(/-/g,'+').replace(/_/g,'/')));
-                document.getElementById('hb').textContent=JSON.stringify(h,null,2);
-                document.getElementById('pb').textContent=JSON.stringify(b,null,2);
-                document.getElementById('sb').textContent=p[2];
+                document.getElementById('hb').textContent = JSON.stringify(h, null, 2);
+                document.getElementById('pb').textContent = JSON.stringify(b, null, 2);
+                document.getElementById('sb').textContent = p[2];
                 var a = [];
-                if (h.alg==='none') a.push('<div class="alert alert-danger"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><div><strong>Critical: alg=none</strong><br>No signature verification. Token can be forged.</div></div>');
-                if (b.exp) { var e=new Date(b.exp*1000); if (e<new Date()) a.push('<div class="alert alert-danger"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><div><strong>Token Expired</strong><br>Expired: '+e.toLocaleString()+'</div></div>'); }
-                if (!b.exp) a.push('<div class="alert alert-warn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><div><strong>No Expiration</strong><br>Token never expires.</div></div>');
-                document.getElementById('alerts').innerHTML=a.join('');
-            } catch(e) { document.getElementById('hb').textContent='Decode error'; }
+                if (h.alg === 'none') a.push('<div class="alert alert-danger"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><div><strong>alg=none</strong> — No signature verification required.</div></div>');
+                if (b.exp) { var e = new Date(b.exp * 1000); if (e < new Date()) a.push('<div class="alert alert-danger"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><div><strong>Expired</strong> — '+e.toLocaleString()+'</div></div>'); }
+                if (!b.exp) a.push('<div class="alert alert-warn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><div><strong>No expiration</strong> — Token never expires.</div></div>');
+                document.getElementById('alerts').innerHTML = a.join('');
+            } catch(e) { document.getElementById('hb').textContent = 'Decode error'; }
         }
 
         function algPage() {
-            return '<div class="card"><input type="text" id="algInput" placeholder="Paste JWT token" oninput="checkAlg()"></div><div class="output" id="algOut"></div><script>setTimeout(checkAlg,100)<\/script>';
+            return '<div class="input-wrap"><input type="text" id="algInput" placeholder="Paste JWT token" oninput="checkAlg()"></div><div class="output-box" id="algOut"></div><script>setTimeout(checkAlg,100)<\/script>';
         }
         function checkAlg() {
-            var v=document.getElementById('algInput')?.value.trim(), r=document.getElementById('algOut');
-            if(!v){r.textContent='';return;} var p=v.split('.'); if(p.length!==3){r.textContent='Invalid';return;}
-            try{var h=JSON.parse(atob(p[0].replace(/-/g,'+').replace(/_/g,'/')));r.textContent='Algorithm: '+(h.alg||'Not specified');}catch(e){r.textContent='Error';}
+            var v = document.getElementById('algInput')?.value.trim(), r = document.getElementById('algOut');
+            if (!v) { r.textContent = ''; return; }
+            var p = v.split('.'); if (p.length !== 3) { r.textContent = 'Invalid JWT'; return; }
+            try { var h = JSON.parse(atob(p[0].replace(/-/g,'+').replace(/_/g,'/'))); r.textContent = h.alg || 'Not specified'; } catch(e) { r.textContent = 'Error'; }
         }
 
         function nonePage() {
-            return '<div class="card"><input type="text" id="noneInput" placeholder="Paste JWT token"></div><button class="btn btn-p" onclick="noneAtk()">Forge alg=none</button><div class="output mt-2" id="noneOut"></div>';
+            return '<div class="input-wrap"><input type="text" id="noneInput" placeholder="Paste JWT token"></div><button class="btn btn-primary" onclick="noneAtk()">Forge alg=none</button><div class="output-box mt-2" id="noneOut"></div>';
         }
         function noneAtk() {
-            var v=document.getElementById('noneInput')?.value.trim(), r=document.getElementById('noneOut');
-            if(!v){r.textContent='Paste token';return;} var p=v.split('.'); if(p.length!==3){r.textContent='Invalid';return;}
-            try{var b=JSON.parse(atob(p[1].replace(/-/g,'+').replace(/_/g,'/')));var h=btoa(JSON.stringify({alg:'none',typ:'JWT'})).replace(/=/g,'');var bb=btoa(JSON.stringify(b)).replace(/=/g,'');r.textContent=h+'.'+bb+'.';}catch(e){r.textContent='Error';}
+            var v = document.getElementById('noneInput')?.value.trim(), r = document.getElementById('noneOut');
+            if (!v) { r.textContent = 'Paste a token'; return; }
+            var p = v.split('.'); if (p.length !== 3) { r.textContent = 'Invalid JWT'; return; }
+            try { var b = JSON.parse(atob(p[1].replace(/-/g,'+').replace(/_/g,'/'))); var h = btoa(JSON.stringify({alg:'none',typ:'JWT'})).replace(/=/g,''); var bb = btoa(JSON.stringify(b)).replace(/=/g,''); r.textContent = h+'.'+bb+'.'; } catch(e) { r.textContent = 'Error'; }
         }
 
         function secretPage() {
-            return '<div class="card"><input type="text" id="secInput" placeholder="Paste HS256 JWT"></div><button class="btn btn-p" onclick="secScan()">Scan</button><div class="output mt-2" id="secOut"></div>';
+            return '<div class="input-wrap"><input type="text" id="secInput" placeholder="Paste HS256 JWT"></div><button class="btn btn-primary" onclick="secScan()">Scan</button><div class="output-box mt-2" id="secOut"></div>';
         }
-        function secScan() { document.getElementById('secOut').textContent='Common secrets:\n'+commonSecrets.join('\n'); }
+        function secScan() { document.getElementById('secOut').textContent = secrets.join('\n'); }
 
         function expiryPage() {
-            return '<div class="card"><input type="text" id="expInput" placeholder="Paste JWT" oninput="chkExp()"></div><div class="output" id="expOut"></div><script>setTimeout(chkExp,100)<\/script>';
+            return '<div class="input-wrap"><input type="text" id="expInput" placeholder="Paste JWT" oninput="chkExp()"></div><div class="output-box" id="expOut"></div><script>setTimeout(chkExp,100)<\/script>';
         }
         function chkExp() {
-            var v=document.getElementById('expInput')?.value.trim(), r=document.getElementById('expOut');
-            if(!v){r.textContent='';return;} var p=v.split('.'); if(p.length!==3){r.textContent='Invalid';return;}
-            try{var b=JSON.parse(atob(p[1].replace(/-/g,'+').replace(/_/g,'/')));var l=[];if(b.exp){var e=new Date(b.exp*1000);l.push('Expires: '+e.toLocaleString()+' ('+(e<new Date()?'EXPIRED':'valid')+')');}else l.push('No expiration');r.textContent=l.join('\n');}catch(e){r.textContent='Error';}
+            var v = document.getElementById('expInput')?.value.trim(), r = document.getElementById('expOut');
+            if (!v) { r.textContent = ''; return; }
+            var p = v.split('.'); if (p.length !== 3) { r.textContent = 'Invalid'; return; }
+            try { var b = JSON.parse(atob(p[1].replace(/-/g,'+').replace(/_/g,'/'))); r.textContent = b.exp ? new Date(b.exp*1000).toLocaleString() : 'No expiration'; } catch(e) { r.textContent = 'Error'; }
         }
 
         function confusionPage() {
-            return '<div class="card"><input type="text" id="confInput" placeholder="Paste RS256 JWT"></div><button class="btn btn-p" onclick="confAtk()">Analyze</button><div class="output mt-2" id="confOut"></div>';
+            return '<div class="input-wrap"><input type="text" id="confInput" placeholder="Paste RS256 JWT"></div><button class="btn btn-primary" onclick="confAtk()">Analyze</button><div class="output-box mt-2" id="confOut"></div>';
         }
         function confAtk() {
-            var v=document.getElementById('confInput')?.value.trim(), r=document.getElementById('confOut');
-            if(!v){r.textContent='Paste token';return;} var p=v.split('.'); if(p.length!==3){r.textContent='Invalid';return;}
-            try{var h=JSON.parse(atob(p[0].replace(/-/g,'+').replace(/_/g,'/')));if(!h.alg||!h.alg.startsWith('RS')){r.textContent='Use RS256 token';return;}r.textContent='Change alg to HS256. Use RSA public key as HMAC secret. Re-sign.';}catch(e){r.textContent='Error';}
+            var v = document.getElementById('confInput')?.value.trim(), r = document.getElementById('confOut');
+            if (!v) { r.textContent = 'Paste a token'; return; }
+            var p = v.split('.'); if (p.length !== 3) { r.textContent = 'Invalid'; return; }
+            try { var h = JSON.parse(atob(p[0].replace(/-/g,'+').replace(/_/g,'/'))); r.textContent = h.alg && h.alg.startsWith('RS') ? 'Change alg to HS256. Use RSA public key as HMAC secret. Re-sign.' : 'Use RS256/384/512 token'; } catch(e) { r.textContent = 'Error'; }
         }
 
         function claimsPage() {
-            return '<div class="card"><input type="text" id="clInput" placeholder="Paste JWT" oninput="shClaims()"></div><div class="output" id="clOut"></div><script>setTimeout(shClaims,100)<\/script>';
+            return '<div class="input-wrap"><input type="text" id="clInput" placeholder="Paste JWT" oninput="shClaims()"></div><div class="output-box" id="clOut"></div><script>setTimeout(shClaims,100)<\/script>';
         }
         function shClaims() {
-            var v=document.getElementById('clInput')?.value.trim(), r=document.getElementById('clOut');
-            if(!v){r.textContent='';return;} var p=v.split('.'); if(p.length!==3){r.textContent='Invalid';return;}
-            try{var b=JSON.parse(atob(p[1].replace(/-/g,'+').replace(/_/g,'/')));var lb={sub:'Subject',name:'Name',email:'Email',iat:'Issued',exp:'Expires',nbf:'Not before',iss:'Issuer',aud:'Audience'};r.innerHTML=Object.keys(b).map(function(k){return '<span style="color:#06b6d4">'+k+'</span> <span style="color:#52525b">'+(lb[k]||'')+'</span>: '+JSON.stringify(b[k])+'<br>';}).join('');}catch(e){r.textContent='Error';}
+            var v = document.getElementById('clInput')?.value.trim(), r = document.getElementById('clOut');
+            if (!v) { r.textContent = ''; return; }
+            var p = v.split('.'); if (p.length !== 3) { r.textContent = 'Invalid'; return; }
+            try { var b = JSON.parse(atob(p[1].replace(/-/g,'+').replace(/_/g,'/'))); r.innerHTML = Object.keys(b).map(function(k) { return '<span style="color:#8b9bff">'+k+'</span>: '+JSON.stringify(b[k])+'<br>'; }).join(''); } catch(e) { r.textContent = 'Error'; }
         }
 
         function generatePage() {
-            return '<div class="card"><input type="text" id="genPayload" placeholder=\'{"sub":"123"}\' class="mb-2"><input type="text" id="genSecret" placeholder="Secret" class="mb-2"></div><button class="btn btn-p" onclick="genTok()">Generate</button><div class="output mt-2" id="genOut"></div>';
+            return '<div class="input-wrap"><input type="text" id="genPayload" placeholder=\'{"sub":"123"}\' class="mb-2"><input type="text" id="genSecret" placeholder="Secret"></div><button class="btn btn-primary" onclick="genTok()">Generate</button><div class="output-box mt-2" id="genOut"></div>';
         }
         function genTok() {
-            var pl=document.getElementById('genPayload')?.value.trim(), sc=document.getElementById('genSecret')?.value.trim()||'secret', r=document.getElementById('genOut');
-            if(!pl){r.textContent='Enter payload';return;} try{JSON.parse(pl);}catch(e){r.textContent='Invalid JSON';return;}
-            var h=btoa(JSON.stringify({alg:'HS256',typ:'JWT'})).replace(/=/g,'');var b=btoa(pl).replace(/=/g,'');r.textContent=h+'.'+b+'.\n\nSign with HMAC-SHA256 using: '+sc;
+            var pl = document.getElementById('genPayload')?.value.trim(), sc = document.getElementById('genSecret')?.value.trim() || 'secret', r = document.getElementById('genOut');
+            if (!pl) { r.textContent = 'Enter payload'; return; }
+            try { JSON.parse(pl); } catch(e) { r.textContent = 'Invalid JSON'; return; }
+            var h = btoa(JSON.stringify({alg:'HS256',typ:'JWT'})).replace(/=/g,''), b = btoa(pl).replace(/=/g,'');
+            r.textContent = h+'.'+b+'.\n\nSign with HMAC-SHA256 using: '+sc;
         }
 
         render();
