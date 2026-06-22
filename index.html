@@ -16,308 +16,280 @@
             --green: #22c55e;
             --yellow: #eab308;
             --red: #ef4444;
-            --purple: #8b5cf6;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            background: var(--bg); color: var(--text);
+            background: #000; color: var(--text);
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            -webkit-font-smoothing: antialiased; min-height: 100vh;
-            display: flex; flex-direction: column;
-            background-image: radial-gradient(ellipse at 50% 0%, rgba(6,182,212,0.03) 0%, transparent 50%);
+            -webkit-font-smoothing: antialiased;
+            overflow: hidden; height: 100vh;
         }
+
+        .preloader {
+            position: fixed; inset: 0; z-index: 9999; background: #000;
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; transition: opacity 0.6s ease, visibility 0.6s ease;
+        }
+        .preloader.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+        .preloader-logo { font-weight: 700; font-size: 32px; letter-spacing: -0.5px; margin-bottom: 40px; }
+        .preloader-logo span { color: var(--cyan); }
+        .preloader-track {
+            width: 200px; height: 1px; background: var(--border);
+            border-radius: 1px; overflow: hidden; position: relative;
+        }
+        .preloader-bar {
+            position: absolute; top: 0; left: 0; height: 100%; width: 0;
+            background: var(--cyan); border-radius: 1px;
+            animation: load 1.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            box-shadow: 0 0 20px rgba(6,182,212,0.5);
+        }
+        @keyframes load {
+            0% { width: 0; }
+            30% { width: 40%; }
+            60% { width: 75%; }
+            90% { width: 98%; }
+            100% { width: 100%; }
+        }
+        .preloader-text {
+            font-size: 11px; color: var(--dim); margin-top: 20px;
+            letter-spacing: 2px; text-transform: uppercase; animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 0%,100%{opacity:0.4} 50%{opacity:1} }
+
+        .app { display: flex; flex-direction: column; height: 100vh; opacity: 0; animation: fadeApp 0.8s ease 2s forwards; }
+        @keyframes fadeApp { to { opacity: 1; } }
+
         .nav {
-            position: sticky; top: 0; z-index: 100;
-            background: rgba(0,0,0,0.7); backdrop-filter: blur(40px) saturate(180%);
-            -webkit-backdrop-filter: blur(40px) saturate(180%);
-            border-bottom: 1px solid rgba(255,255,255,0.05); height: 56px;
-            display: flex; align-items: center; justify-content: space-between; padding: 0 24px;
+            height: 56px; border-bottom: 1px solid rgba(255,255,255,0.05);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 24px; flex-shrink: 0;
         }
-        .logo { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 18px; letter-spacing: -0.3px; }
-        .logo img { height: 24px; width: auto; }
-        .main-container { display: flex; flex: 1; overflow: hidden; }
+        .nav-logo { font-weight: 700; font-size: 17px; letter-spacing: -0.3px; }
+        .nav-logo span { color: var(--cyan); }
+        .nav-badge { font-size: 10px; color: var(--dim); letter-spacing: 1.5px; font-weight: 500; }
+
+        .layout { display: flex; flex: 1; overflow: hidden; }
         .sidebar {
-            width: 260px; border-right: 1px solid rgba(255,255,255,0.04);
-            background: rgba(255,255,255,0.01); padding: 16px 0; overflow-y: auto; flex-shrink: 0;
+            width: 250px; border-right: 1px solid rgba(255,255,255,0.04);
+            background: rgba(255,255,255,0.01); padding: 12px 0; overflow-y: auto;
         }
         .sidebar-item {
-            display: flex; align-items: center; gap: 12px; padding: 12px 24px;
-            cursor: pointer; font-size: 13px; color: var(--dim); transition: all 0.2s ease;
-            border-left: 2px solid transparent; margin: 0 8px; border-radius: 0 8px 8px 0;
+            display: flex; align-items: center; gap: 10px; padding: 11px 20px;
+            cursor: pointer; font-size: 13px; color: var(--dim); transition: all 0.2s;
+            border-left: 2px solid transparent;
         }
         .sidebar-item:hover { background: rgba(255,255,255,0.02); color: var(--text); }
-        .sidebar-item.active { background: rgba(6,182,212,0.06); color: var(--cyan); border-left-color: var(--cyan); }
-        .sidebar-item svg { width: 18px; height: 18px; opacity: 0.4; flex-shrink: 0; transition: all 0.2s; }
-        .sidebar-item:hover svg { opacity: 0.7; }
-        .sidebar-item.active svg { opacity: 1; color: var(--cyan); }
-        .content { flex: 1; padding: 40px; overflow-y: auto; }
-        .tool-header { margin-bottom: 32px; }
-        .tool-header h2 { font-size: 28px; font-weight: 700; letter-spacing: -0.8px; margin-bottom: 8px; }
-        .tool-header p { font-size: 15px; color: var(--dim); line-height: 1.6; max-width: 600px; }
-        .input-area {
+        .sidebar-item.active { background: rgba(6,182,212,0.05); color: var(--cyan); border-left-color: var(--cyan); }
+        .sidebar-item svg { width: 16px; height: 16px; opacity: 0.4; flex-shrink: 0; }
+        .sidebar-item.active svg { opacity: 1; }
+        .main { flex: 1; padding: 36px; overflow-y: auto; animation: slideContent 0.5s ease; }
+        @keyframes slideContent { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .page-header { margin-bottom: 28px; }
+        .page-header h2 { font-size: 26px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 6px; }
+        .page-header p { font-size: 14px; color: var(--dim); }
+
+        .card {
             background: var(--surface); border: 1px solid rgba(255,255,255,0.05);
-            border-radius: 16px; padding: 24px; margin-bottom: 20px;
-            transition: all 0.3s;
+            border-radius: 14px; padding: 22px; margin-bottom: 16px;
+            transition: border-color 0.3s;
         }
-        .input-area:focus-within { border-color: rgba(6,182,212,0.2); box-shadow: 0 0 0 4px rgba(6,182,212,0.03); }
+        .card:focus-within { border-color: rgba(6,182,212,0.2); }
         textarea, input[type="text"] {
             width: 100%; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06);
-            border-radius: 12px; padding: 16px 20px; color: var(--text);
-            font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
-            font-size: 14px; outline: none; transition: all 0.3s; resize: vertical; line-height: 1.7;
+            border-radius: 10px; padding: 14px 18px; color: var(--text);
+            font-family: 'SF Mono', 'Fira Code', monospace; font-size: 13px;
+            outline: none; transition: all 0.3s; resize: vertical; line-height: 1.6;
         }
         textarea:focus, input[type="text"]:focus { border-color: rgba(6,182,212,0.3); background: rgba(255,255,255,0.03); }
-        textarea { min-height: 160px; }
+        textarea { min-height: 140px; }
         textarea::placeholder, input::placeholder { color: #3f3f46; }
+
         .btn {
-            display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px;
-            border-radius: 12px; border: none; cursor: pointer; font-size: 14px;
-            font-weight: 600; font-family: inherit; transition: all 0.3s; white-space: nowrap;
-            letter-spacing: -0.2px;
+            display: inline-flex; align-items: center; gap: 8px; padding: 10px 22px;
+            border-radius: 10px; border: none; cursor: pointer; font-size: 13px;
+            font-weight: 600; font-family: inherit; transition: all 0.3s;
         }
         .btn-p { background: var(--cyan); color: #000; }
-        .btn-p:hover { background: #22d3ee; box-shadow: 0 8px 32px rgba(6,182,212,0.15); transform: translateY(-1px); }
+        .btn-p:hover { filter: brightness(1.1); box-shadow: 0 4px 20px rgba(6,182,212,0.2); }
         .btn-s { background: rgba(255,255,255,0.03); color: var(--text); border: 1px solid rgba(255,255,255,0.08); }
-        .btn-s:hover { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.15); }
-        .result-box {
+        .btn-s:hover { background: rgba(255,255,255,0.06); }
+
+        .output {
             background: var(--surface); border: 1px solid rgba(255,255,255,0.05);
-            border-radius: 16px; padding: 24px;
-            font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
-            font-size: 14px; white-space: pre-wrap; word-break: break-all;
-            min-height: 80px; color: var(--muted); line-height: 1.8; transition: all 0.3s;
+            border-radius: 14px; padding: 20px; font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 13px; white-space: pre-wrap; word-break: break-all;
+            color: var(--muted); line-height: 1.7; min-height: 60px;
         }
-        .alert {
-            padding: 16px 20px; border-radius: 14px; font-size: 13px;
-            margin-top: 16px; display: flex; align-items: flex-start; gap: 12px; line-height: 1.6;
-            animation: slideIn 0.3s ease;
-        }
-        @keyframes slideIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+        .label { font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 6px; font-weight: 600; }
+        .alert { padding: 14px 18px; border-radius: 12px; font-size: 13px; margin-top: 14px; display: flex; gap: 10px; line-height: 1.5; animation: slideIn 0.3s ease; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(-6px); } }
         .alert-info { background: rgba(6,182,212,0.04); color: #22d3ee; border: 1px solid rgba(6,182,212,0.1); }
         .alert-warn { background: rgba(234,179,8,0.04); color: #facc15; border: 1px solid rgba(234,179,8,0.1); }
         .alert-danger { background: rgba(239,68,68,0.04); color: #f87171; border: 1px solid rgba(239,68,68,0.1); }
-        .alert svg { width: 18px; height: 18px; flex-shrink: 0; margin-top: 1px; }
-        .flex { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-        .mt-2 { margin-top: 14px; }
-        .mt-3 { margin-top: 20px; }
-        .mt-4 { margin-top: 28px; }
-        .mb-2 { margin-bottom: 12px; }
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-        .mono { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 13px; }
-        .label {
-            font-size: 10px; color: var(--dim); text-transform: uppercase;
-            letter-spacing: 1.5px; margin-bottom: 8px; font-weight: 600;
-        }
+        .alert svg { width: 16px; height: 16px; flex-shrink: 0; margin-top: 2px; }
+        .flex { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .mt-2 { margin-top: 12px; }
+        .mt-3 { margin-top: 18px; }
+        .mb-2 { margin-bottom: 10px; }
+
         @media (max-width: 768px) {
-            .main-container { flex-direction: column; }
+            .layout { flex-direction: column; }
             .sidebar { width: 100%; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.04); flex-direction: row; overflow-x: auto; padding: 4px; }
-            .sidebar-item { flex-shrink: 0; border-left: none; border-bottom: 2px solid transparent; font-size: 12px; padding: 10px 16px; margin: 0; border-radius: 0; }
+            .sidebar-item { flex-shrink: 0; border-left: none; border-bottom: 2px solid transparent; font-size: 11px; padding: 10px 14px; }
             .sidebar-item.active { border-bottom-color: var(--cyan); }
             .grid-2 { grid-template-columns: 1fr; }
-            .content { padding: 20px; }
+            .main { padding: 20px; }
         }
     </style>
 </head>
 <body>
-    <nav class="nav">
-        <div class="logo">
-            <img src="binaris.png" alt="Binaris" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
-            <span style="display:none">BINARIS</span>
-        </div>
-        <span style="font-size:10px;color:var(--dim);letter-spacing:2px;font-weight:500;text-transform:uppercase">JWT Security Toolkit</span>
-    </nav>
 
-    <div class="main-container">
-        <aside class="sidebar" id="sidebar"></aside>
-        <main class="content" id="main"></main>
+    <div class="preloader" id="preloader">
+        <div class="preloader-logo">BIN<span>ARIS</span></div>
+        <div class="preloader-track"><div class="preloader-bar"></div></div>
+        <div class="preloader-text">Initializing toolkit</div>
+    </div>
+
+    <div class="app" id="app">
+        <nav class="nav">
+            <div class="nav-logo">BIN<span>ARIS</span></div>
+            <div class="nav-badge">JWT Security Toolkit</div>
+        </nav>
+        <div class="layout">
+            <aside class="sidebar" id="sidebar"></aside>
+            <main class="main" id="main"></main>
+        </div>
     </div>
 
     <script>
+        setTimeout(function() {
+            document.getElementById('preloader').classList.add('hidden');
+        }, 2200);
+
         var tools = [
-            { id: 'decode', name: 'Decode JWT', desc: 'Decode and inspect header, payload, and signature with real-time security alerts', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/></svg>' },
-            { id: 'alg', name: 'Algorithm Analysis', desc: 'Detect algorithm type and identify security misconfigurations', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>' },
-            { id: 'none', name: 'alg=none Exploit', desc: 'Test if the server accepts tokens with no signature verification', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>' },
-            { id: 'secret', name: 'Weak Secret Scanner', desc: 'Test JWT against common weak secrets and default passwords', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>' },
-            { id: 'expiry', name: 'Time Claim Inspector', desc: 'Analyze token expiration, not-before, and issued-at claims', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' },
-            { id: 'confusion', name: 'Key Confusion Test', desc: 'Test RS256 to HS256 algorithm confusion vulnerability', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>' },
-            { id: 'claims', name: 'Claims Deep Dive', desc: 'View all JWT claims with detailed explanations', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>' },
-            { id: 'generate', name: 'Token Forge', desc: 'Generate test JWT tokens with custom payload and secret', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>' },
+            { id: 'decode', name: 'Decode JWT', desc: 'Decode header, payload, and signature with security alerts', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/></svg>' },
+            { id: 'alg', name: 'Algorithm Analysis', desc: 'Detect algorithm and security misconfigurations', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>' },
+            { id: 'none', name: 'alg=none Exploit', desc: 'Test if server accepts tokens without signature', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>' },
+            { id: 'secret', name: 'Weak Secret Scanner', desc: 'Test against common weak secrets', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>' },
+            { id: 'expiry', name: 'Time Claim Inspector', desc: 'Analyze expiration and time-based claims', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' },
+            { id: 'confusion', name: 'Key Confusion Test', desc: 'Test RS256 to HS256 algorithm confusion', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>' },
+            { id: 'claims', name: 'Claims Deep Dive', desc: 'View all claims with detailed explanations', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>' },
+            { id: 'generate', name: 'Token Forge', desc: 'Generate test JWT tokens with custom payload', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>' }
         ];
 
-        var commonSecrets = ['secret','password','123456','admin','key','jwt_secret','changeme','test','private','public','your-256-bit-secret','secretkey','default','root','passw0rd'];
+        var commonSecrets = ['secret','password','123456','admin','key','jwt_secret','changeme','test','private','public','your-256-bit-secret','secretkey'];
 
         function render() {
-            var s = document.getElementById('sidebar');
-            s.innerHTML = tools.map(function(t) {
-                return '<div class="sidebar-item" data-id="'+t.id+'" onclick="selectTool(\''+t.id+'\')">'+t.icon+t.name+'</div>';
+            document.getElementById('sidebar').innerHTML = tools.map(function(t) {
+                return '<div class="sidebar-item" data-id="'+t.id+'" onclick="select(\''+t.id+'\')">'+t.icon+t.name+'</div>';
             }).join('');
-            selectTool('decode');
+            select('decode');
         }
 
-        function selectTool(id) {
+        function select(id) {
             document.querySelectorAll('.sidebar-item').forEach(function(el) { el.classList.remove('active'); });
             document.querySelector('[data-id="'+id+'"]').classList.add('active');
-            document.getElementById('main').innerHTML = renderTool(id);
+            document.getElementById('main').innerHTML = page(id);
         }
 
-        function renderTool(id) {
+        function page(id) {
             var t = tools.find(function(x){return x.id===id;});
-            var h = '<div class="tool-header"><h2>'+t.name+'</h2><p>'+t.desc+'</p></div>';
-            if (id==='decode') h += decodeUI();
-            if (id==='alg') h += algUI();
-            if (id==='none') h += noneUI();
-            if (id==='secret') h += secretUI();
-            if (id==='expiry') h += expiryUI();
-            if (id==='confusion') h += confusionUI();
-            if (id==='claims') h += claimsUI();
-            if (id==='generate') h += generateUI();
+            var h = '<div class="page-header"><h2>'+t.name+'</h2><p>'+t.desc+'</p></div>';
+            if (id==='decode') h += decodePage();
+            if (id==='alg') h += algPage();
+            if (id==='none') h += nonePage();
+            if (id==='secret') h += secretPage();
+            if (id==='expiry') h += expiryPage();
+            if (id==='confusion') h += confusionPage();
+            if (id==='claims') h += claimsPage();
+            if (id==='generate') h += generatePage();
             return h;
         }
 
-        function decodeUI() {
-            return '<div class="input-area"><textarea id="jwtInput" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c" oninput="decodeJWT()"></textarea></div>'+
-                '<div class="grid-2"><div><div class="label">Header</div><div class="result-box" id="headerBox"></div></div>'+
-                '<div><div class="label">Payload</div><div class="result-box" id="payloadBox"></div></div></div>'+
-                '<div class="mt-2"><div class="label">Signature</div><div class="result-box mono" id="sigBox"></div></div>'+
-                '<div id="decodeAlerts"></div>'+
-                '<script>setTimeout(function(){decodeJWT()},100)<\/script>';
+        function decodePage() {
+            return '<div class="card"><textarea id="jwtInput" placeholder="Paste JWT token here..." oninput="decodeJWT()"></textarea></div>'+
+                '<div class="grid-2"><div><div class="label">Header</div><div class="output" id="hb"></div></div><div><div class="label">Payload</div><div class="output" id="pb"></div></div></div>'+
+                '<div class="mt-2"><div class="label">Signature</div><div class="output" id="sb" style="font-size:12px"></div></div><div id="alerts"></div>';
         }
 
         function decodeJWT() {
-            var v = document.getElementById('jwtInput').value.trim();
-            var hb = document.getElementById('headerBox'), pb = document.getElementById('payloadBox'), sb = document.getElementById('sigBox'), ab = document.getElementById('decodeAlerts');
-            if (!v) { hb.textContent='';pb.textContent='';sb.textContent='';ab.innerHTML='';return; }
-            var parts = v.split('.');
-            if (parts.length !== 3) { hb.textContent='Invalid format';pb.textContent='';sb.textContent='';ab.innerHTML='<div class="alert alert-danger"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg><div>Invalid token format. A JWT must contain exactly three Base64-encoded parts separated by dots.</div></div>';return; }
+            var v = document.getElementById('jwtInput')?.value.trim();
+            if (!v) { document.getElementById('hb').textContent='';document.getElementById('pb').textContent='';document.getElementById('sb').textContent='';document.getElementById('alerts').innerHTML='';return; }
+            var p = v.split('.');
+            if (p.length!==3) { document.getElementById('hb').textContent='Invalid JWT';return; }
             try {
-                var h = JSON.parse(atob(parts[0].replace(/-/g,'+').replace(/_/g,'/')));
-                var p = JSON.parse(atob(parts[1].replace(/-/g,'+').replace(/_/g,'/')));
-                hb.textContent = JSON.stringify(h, null, 2); pb.textContent = JSON.stringify(p, null, 2); sb.textContent = parts[2];
-                var alerts = [];
-                if (h.alg === 'none') alerts.push('<div class="alert alert-danger"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><div><strong>Critical: alg=none</strong><br>No signature verification. Anyone can forge this token.</div></div>');
-                if (h.alg && h.alg.startsWith('HS')) alerts.push('<div class="alert alert-info"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg><div><strong>HMAC Algorithm: '+h.alg+'</strong><br>Symmetric key. Ensure the secret is strong and not hardcoded.</div></div>');
-                if (h.alg && h.alg.startsWith('RS')) alerts.push('<div class="alert alert-info"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg><div><strong>RSA Algorithm: '+h.alg+'</strong><br>Asymmetric keys. Private key must remain confidential.</div></div>');
-                if (p.exp) {
-                    var exp = new Date(p.exp * 1000), now = new Date();
-                    if (exp < now) alerts.push('<div class="alert alert-danger"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><div><strong>Token Expired</strong><br>Expired on '+exp.toLocaleString()+'. Server should reject.</div></div>');
-                    else alerts.push('<div class="alert alert-info"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><div><strong>Token Valid</strong><br>Expires on '+exp.toLocaleString()+'.</div></div>');
-                }
-                if (!p.exp) alerts.push('<div class="alert alert-warn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><div><strong>No Expiration</strong><br>Token never expires. This is a security concern.</div></div>');
-                ab.innerHTML = alerts.join('');
-            } catch(e) { hb.textContent='Decoding failed'; pb.textContent='Invalid encoding'; sb.textContent=''; ab.innerHTML='<div class="alert alert-danger"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg><div>Failed to decode. Verify the Base64 encoding is valid.</div></div>'; }
+                var h = JSON.parse(atob(p[0].replace(/-/g,'+').replace(/_/g,'/')));
+                var b = JSON.parse(atob(p[1].replace(/-/g,'+').replace(/_/g,'/')));
+                document.getElementById('hb').textContent=JSON.stringify(h,null,2);
+                document.getElementById('pb').textContent=JSON.stringify(b,null,2);
+                document.getElementById('sb').textContent=p[2];
+                var a = [];
+                if (h.alg==='none') a.push('<div class="alert alert-danger"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><div><strong>Critical: alg=none</strong><br>No signature verification. Token can be forged.</div></div>');
+                if (b.exp) { var e=new Date(b.exp*1000); if (e<new Date()) a.push('<div class="alert alert-danger"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><div><strong>Token Expired</strong><br>Expired: '+e.toLocaleString()+'</div></div>'); }
+                if (!b.exp) a.push('<div class="alert alert-warn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><div><strong>No Expiration</strong><br>Token never expires.</div></div>');
+                document.getElementById('alerts').innerHTML=a.join('');
+            } catch(e) { document.getElementById('hb').textContent='Decode error'; }
         }
 
-        function algUI() {
-            return '<div class="input-area"><input type="text" id="algInput" placeholder="Paste JWT token to analyze its algorithm" oninput="checkAlg()"></div><div id="algResult" class="result-box"></div><script>setTimeout(function(){checkAlg()},100)<\/script>';
+        function algPage() {
+            return '<div class="card"><input type="text" id="algInput" placeholder="Paste JWT token" oninput="checkAlg()"></div><div class="output" id="algOut"></div><script>setTimeout(checkAlg,100)<\/script>';
         }
-
         function checkAlg() {
-            var v = document.getElementById('algInput').value.trim(), r = document.getElementById('algResult');
-            if (!v) { r.textContent='';return; }
-            var parts = v.split('.');
-            if (parts.length !== 3) { r.textContent='Invalid JWT format';return; }
-            try {
-                var h = JSON.parse(atob(parts[0].replace(/-/g,'+').replace(/_/g,'/')));
-                var alg = h.alg || 'Not specified', issues = [];
-                if (alg === 'none') issues.push('No signature verification');
-                if (!h.alg) issues.push('Algorithm field missing from header');
-                var std = ['HS256','HS384','HS512','RS256','RS384','RS512','ES256','ES384','ES512','PS256','PS384','PS512'];
-                if (alg !== 'none' && !std.includes(alg)) issues.push('Non-standard algorithm');
-                r.textContent = 'Algorithm: ' + alg + '\n\n' + (issues.length ? issues.join('\n') : 'Standard algorithm. No concerns.');
-            } catch(e) { r.textContent='Failed to decode header'; }
+            var v=document.getElementById('algInput')?.value.trim(), r=document.getElementById('algOut');
+            if(!v){r.textContent='';return;} var p=v.split('.'); if(p.length!==3){r.textContent='Invalid';return;}
+            try{var h=JSON.parse(atob(p[0].replace(/-/g,'+').replace(/_/g,'/')));r.textContent='Algorithm: '+(h.alg||'Not specified');}catch(e){r.textContent='Error';}
         }
 
-        function noneUI() {
-            return '<div class="input-area"><input type="text" id="noneInput" placeholder="Paste any JWT token to generate an alg=none version"></div><button class="btn btn-p" onclick="noneAttack()">Forge alg=none Token</button><div id="noneResult" class="result-box mt-2"></div>';
+        function nonePage() {
+            return '<div class="card"><input type="text" id="noneInput" placeholder="Paste JWT token"></div><button class="btn btn-p" onclick="noneAtk()">Forge alg=none</button><div class="output mt-2" id="noneOut"></div>';
+        }
+        function noneAtk() {
+            var v=document.getElementById('noneInput')?.value.trim(), r=document.getElementById('noneOut');
+            if(!v){r.textContent='Paste token';return;} var p=v.split('.'); if(p.length!==3){r.textContent='Invalid';return;}
+            try{var b=JSON.parse(atob(p[1].replace(/-/g,'+').replace(/_/g,'/')));var h=btoa(JSON.stringify({alg:'none',typ:'JWT'})).replace(/=/g,'');var bb=btoa(JSON.stringify(b)).replace(/=/g,'');r.textContent=h+'.'+bb+'.';}catch(e){r.textContent='Error';}
         }
 
-        function noneAttack() {
-            var v = document.getElementById('noneInput').value.trim(), r = document.getElementById('noneResult');
-            if (!v) { r.textContent='Paste a JWT token to begin';return; }
-            var parts = v.split('.');
-            if (parts.length !== 3) { r.textContent='Invalid JWT format';return; }
-            try {
-                var p = JSON.parse(atob(parts[1].replace(/-/g,'+').replace(/_/g,'/')));
-                var h = btoa(JSON.stringify({alg:'none',typ:'JWT'})).replace(/=/g,'');
-                var b = btoa(JSON.stringify(p)).replace(/=/g,'');
-                r.textContent = 'Forged Token:\n\n' + h + '.' + b + '.\n\nSubmit this token. If accepted, the vulnerability is confirmed.';
-            } catch(e) { r.textContent='Failed to decode payload'; }
+        function secretPage() {
+            return '<div class="card"><input type="text" id="secInput" placeholder="Paste HS256 JWT"></div><button class="btn btn-p" onclick="secScan()">Scan</button><div class="output mt-2" id="secOut"></div>';
+        }
+        function secScan() { document.getElementById('secOut').textContent='Common secrets:\n'+commonSecrets.join('\n'); }
+
+        function expiryPage() {
+            return '<div class="card"><input type="text" id="expInput" placeholder="Paste JWT" oninput="chkExp()"></div><div class="output" id="expOut"></div><script>setTimeout(chkExp,100)<\/script>';
+        }
+        function chkExp() {
+            var v=document.getElementById('expInput')?.value.trim(), r=document.getElementById('expOut');
+            if(!v){r.textContent='';return;} var p=v.split('.'); if(p.length!==3){r.textContent='Invalid';return;}
+            try{var b=JSON.parse(atob(p[1].replace(/-/g,'+').replace(/_/g,'/')));var l=[];if(b.exp){var e=new Date(b.exp*1000);l.push('Expires: '+e.toLocaleString()+' ('+(e<new Date()?'EXPIRED':'valid')+')');}else l.push('No expiration');r.textContent=l.join('\n');}catch(e){r.textContent='Error';}
         }
 
-        function secretUI() {
-            return '<div class="input-area"><input type="text" id="secretInput" placeholder="Paste HS256/HS384/HS512 JWT token"></div><button class="btn btn-p" onclick="checkSecret()">Scan Weak Secrets</button><div id="secretResult" class="result-box mt-2"></div>';
+        function confusionPage() {
+            return '<div class="card"><input type="text" id="confInput" placeholder="Paste RS256 JWT"></div><button class="btn btn-p" onclick="confAtk()">Analyze</button><div class="output mt-2" id="confOut"></div>';
+        }
+        function confAtk() {
+            var v=document.getElementById('confInput')?.value.trim(), r=document.getElementById('confOut');
+            if(!v){r.textContent='Paste token';return;} var p=v.split('.'); if(p.length!==3){r.textContent='Invalid';return;}
+            try{var h=JSON.parse(atob(p[0].replace(/-/g,'+').replace(/_/g,'/')));if(!h.alg||!h.alg.startsWith('RS')){r.textContent='Use RS256 token';return;}r.textContent='Change alg to HS256. Use RSA public key as HMAC secret. Re-sign.';}catch(e){r.textContent='Error';}
         }
 
-        function checkSecret() {
-            var v = document.getElementById('secretInput').value.trim(), r = document.getElementById('secretResult');
-            if (!v) { r.textContent='Paste a token first';return; }
-            r.textContent = 'Common Weak Secrets:\n\n' + commonSecrets.map(function(s,i){return (i+1)+'. '+s}).join('\n') + '\n\nTest each with an external verifier. If any succeed, the secret is compromised.';
+        function claimsPage() {
+            return '<div class="card"><input type="text" id="clInput" placeholder="Paste JWT" oninput="shClaims()"></div><div class="output" id="clOut"></div><script>setTimeout(shClaims,100)<\/script>';
+        }
+        function shClaims() {
+            var v=document.getElementById('clInput')?.value.trim(), r=document.getElementById('clOut');
+            if(!v){r.textContent='';return;} var p=v.split('.'); if(p.length!==3){r.textContent='Invalid';return;}
+            try{var b=JSON.parse(atob(p[1].replace(/-/g,'+').replace(/_/g,'/')));var lb={sub:'Subject',name:'Name',email:'Email',iat:'Issued',exp:'Expires',nbf:'Not before',iss:'Issuer',aud:'Audience'};r.innerHTML=Object.keys(b).map(function(k){return '<span style="color:#06b6d4">'+k+'</span> <span style="color:#52525b">'+(lb[k]||'')+'</span>: '+JSON.stringify(b[k])+'<br>';}).join('');}catch(e){r.textContent='Error';}
         }
 
-        function expiryUI() {
-            return '<div class="input-area"><input type="text" id="expiryInput" placeholder="Paste JWT token to inspect time claims" oninput="checkExpiry()"></div><div id="expiryResult" class="result-box"></div><script>setTimeout(function(){checkExpiry()},100)<\/script>';
+        function generatePage() {
+            return '<div class="card"><input type="text" id="genPayload" placeholder=\'{"sub":"123"}\' class="mb-2"><input type="text" id="genSecret" placeholder="Secret" class="mb-2"></div><button class="btn btn-p" onclick="genTok()">Generate</button><div class="output mt-2" id="genOut"></div>';
         }
-
-        function checkExpiry() {
-            var v = document.getElementById('expiryInput').value.trim(), r = document.getElementById('expiryResult');
-            if (!v) { r.textContent='';return; }
-            var parts = v.split('.');
-            if (parts.length !== 3) { r.textContent='Invalid JWT';return; }
-            try {
-                var p = JSON.parse(atob(parts[1].replace(/-/g,'+').replace(/_/g,'/')));
-                var lines = [];
-                if (p.exp) { var e = new Date(p.exp*1000); lines.push('Expiration: '+e.toLocaleString()+' ('+(e<new Date()?'EXPIRED':'valid')+')'); }
-                else lines.push('Expiration: Not set');
-                if (p.nbf) lines.push('Not Before: '+new Date(p.nbf*1000).toLocaleString());
-                if (p.iat) lines.push('Issued At: '+new Date(p.iat*1000).toLocaleString());
-                if (!lines.length) lines.push('No time claims found');
-                r.textContent = lines.join('\n');
-            } catch(e) { r.textContent='Decoding failed'; }
-        }
-
-        function confusionUI() {
-            return '<div class="input-area"><input type="text" id="confInput" placeholder="Paste RS256 JWT token"><input type="text" id="confPubKey" placeholder="RSA Public Key (PEM)" class="mt-2"></div><button class="btn btn-p" onclick="confusionAttack()">Analyze Confusion Risk</button><div id="confResult" class="result-box mt-2"></div>';
-        }
-
-        function confusionAttack() {
-            var v = document.getElementById('confInput').value.trim(), r = document.getElementById('confResult');
-            if (!v) { r.textContent='Paste an RS256 token';return; }
-            var parts = v.split('.');
-            if (parts.length !== 3) { r.textContent='Invalid JWT';return; }
-            try {
-                var h = JSON.parse(atob(parts[0].replace(/-/g,'+').replace(/_/g,'/')));
-                if (!h.alg || !h.alg.startsWith('RS')) { r.textContent='This attack targets RS256/384/512 tokens. Detected: '+(h.alg||'none');return; }
-                r.textContent = 'Attack Steps:\n\n1. Change algorithm to HS256\n2. Use RSA public key as HMAC secret\n3. Re-sign with HMAC-SHA256\n\nIf server accepts, key confusion vulnerability exists.';
-            } catch(e) { r.textContent='Decoding failed'; }
-        }
-
-        function claimsUI() {
-            return '<div class="input-area"><input type="text" id="claimsInput" placeholder="Paste JWT token to explore all claims" oninput="showClaims()"></div><div id="claimsResult" class="result-box"></div><script>setTimeout(function(){showClaims()},100)<\/script>';
-        }
-
-        function showClaims() {
-            var v = document.getElementById('claimsInput').value.trim(), r = document.getElementById('claimsResult');
-            if (!v) { r.textContent='';return; }
-            var parts = v.split('.');
-            if (parts.length !== 3) { r.textContent='Invalid JWT';return; }
-            try {
-                var p = JSON.parse(atob(parts[1].replace(/-/g,'+').replace(/_/g,'/')));
-                var labels = {sub:'Subject identifier',name:'Full name',email:'Email',iat:'Issued at',exp:'Expiration',nbf:'Not before',iss:'Issuer',aud:'Audience',jti:'Token ID'};
-                r.innerHTML = Object.keys(p).map(function(k){return '<div style="margin-bottom:10px"><span style="color:var(--cyan);font-weight:600">'+k+'</span><span style="color:var(--dim);font-size:12px;margin-left:10px">'+(labels[k]||'')+'</span><br><span style="color:var(--muted)">'+JSON.stringify(p[k])+'</span></div>'}).join('');
-                if (!Object.keys(p).length) r.innerHTML = '<span style="color:var(--dim)">No claims in payload</span>';
-            } catch(e) { r.textContent='Decoding failed'; }
-        }
-
-        function generateUI() {
-            return '<div class="input-area"><input type="text" id="genPayload" placeholder=\'{"sub":"123","name":"John","email":"john@example.com"}\' class="mb-2"><input type="text" id="genSecret" placeholder="Signing secret" class="mb-2"></div><button class="btn btn-p" onclick="genToken()">Generate Token</button><div id="genResult" class="result-box mt-2"></div>';
-        }
-
-        function genToken() {
-            var payload = document.getElementById('genPayload').value.trim(), secret = document.getElementById('genSecret').value.trim()||'secret', r = document.getElementById('genResult');
-            if (!payload) { r.textContent='Enter JSON payload';return; }
-            try { JSON.parse(payload); } catch(e) { r.textContent='Invalid JSON';return; }
-            var h = btoa(JSON.stringify({alg:'HS256',typ:'JWT'})).replace(/=/g,'');
-            var b = btoa(payload).replace(/=/g,'');
-            r.textContent = h+'.'+b+'.\n\nSign with HMAC-SHA256 using: '+secret;
+        function genTok() {
+            var pl=document.getElementById('genPayload')?.value.trim(), sc=document.getElementById('genSecret')?.value.trim()||'secret', r=document.getElementById('genOut');
+            if(!pl){r.textContent='Enter payload';return;} try{JSON.parse(pl);}catch(e){r.textContent='Invalid JSON';return;}
+            var h=btoa(JSON.stringify({alg:'HS256',typ:'JWT'})).replace(/=/g,'');var b=btoa(pl).replace(/=/g,'');r.textContent=h+'.'+b+'.\n\nSign with HMAC-SHA256 using: '+sc;
         }
 
         render();
