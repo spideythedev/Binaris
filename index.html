@@ -31,8 +31,7 @@
             justify-content: center; transition: opacity 0.6s ease, visibility 0.6s ease;
         }
         .preloader.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
-        .preloader-logo { font-weight: 700; font-size: 32px; letter-spacing: -0.5px; margin-bottom: 40px; }
-        .preloader-logo span { color: var(--cyan); }
+        .preloader img { height: 40px; margin-bottom: 32px; }
         .preloader-track {
             width: 200px; height: 1px; background: var(--border);
             border-radius: 1px; overflow: hidden; position: relative;
@@ -64,8 +63,7 @@
             display: flex; align-items: center; justify-content: space-between;
             padding: 0 24px; flex-shrink: 0;
         }
-        .nav-logo { font-weight: 700; font-size: 17px; letter-spacing: -0.3px; }
-        .nav-logo span { color: var(--cyan); }
+        .nav img { height: 22px; }
         .nav-badge { font-size: 10px; color: var(--dim); letter-spacing: 1.5px; font-weight: 500; }
 
         .layout { display: flex; flex: 1; overflow: hidden; }
@@ -147,14 +145,16 @@
 <body>
 
     <div class="preloader" id="preloader">
-        <div class="preloader-logo">BIN<span>ARIS</span></div>
+        <img src="binaris.png" alt="Binaris" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+        <div style="display:none;font-weight:700;font-size:32px;letter-spacing:-0.5px;margin-bottom:32px">BIN<span style="color:#06b6d4">ARIS</span></div>
         <div class="preloader-track"><div class="preloader-bar"></div></div>
         <div class="preloader-text">Initializing toolkit</div>
     </div>
 
     <div class="app" id="app">
         <nav class="nav">
-            <div class="nav-logo">BIN<span>ARIS</span></div>
+            <img src="binaris.png" alt="Binaris" onerror="this.style.display='none';this.nextElementSibling.style.display='block'" style="height:22px">
+            <span style="display:none;font-weight:700;font-size:17px;letter-spacing:-0.3px">BIN<span style="color:#06b6d4">ARIS</span></span>
             <div class="nav-badge">JWT Security Toolkit</div>
         </nav>
         <div class="layout">
